@@ -16,14 +16,17 @@ FUENTE = "CMU, Georgia, 'Times New Roman', serif"
 TINTA = "#1a1a1a"
 GRIS = "#555555"
 PAPEL = "#ffffff"
+REJILLA = "#1f1f1f"
 
-# Escalas divergentes con el centro en un gris cálido muy claro: los extremos
-# saturan poco a poco y el texto sigue siendo legible encima de cualquier tono.
+# Escalas divergentes con el centro en un gris cálido muy claro. En rojo y verde
+# el color se satura pronto (una caída pequeña ya se ve roja) y oscurece hacia los
+# extremos; Plotly pone el texto en blanco o negro según el fondo.
 ESCALAS = {
     "rv": {  # rojo-verde, los mismos tonos que Sharpe Lab
         "nombre": "Rojo y verde",
-        "colores": [[0.0, "#7f1f1b"], [0.2, "#a8322d"], [0.4, "#e2b3ac"], [0.5, "#ecebe6"],
-                    [0.6, "#aecdb5"], [0.8, "#2d6a3e"], [1.0, "#1b4628"]],
+        "colores": [[0.0, "#6e0000"], [0.2, "#9e0000"], [0.35, "#c40000"], [0.43, "#e00000"],
+                    [0.475, "#ec6a64"], [0.5, "#ecebe6"], [0.525, "#6cc07f"], [0.57, "#12a039"],
+                    [0.65, "#0b8a2e"], [0.8, "#086b23"], [1.0, "#044516"]],
     },
     "ab": {  # apto para daltónicos
         "nombre": "Naranja y azul",
@@ -65,6 +68,8 @@ def tam_letra(cuota: float) -> float:
 
 def mapa_base(nodos: dict, periodo: str, por_periodo: dict, escala: str = "rv") -> go.Figure:
     pp = por_periodo[periodo]
+    # Rejilla oscura: línea fina entre valores y más gruesa alrededor de cada sector.
+    bordes = [0 if i == "S&P 500" else 2.5 if i.startswith("sec:") else 1 for i in nodos["ids"]]
     fig = go.Figure(go.Treemap(
         ids=nodos["ids"], labels=pp["labels"], parents=nodos["parents"],
         values=nodos["valores_cap"], branchvalues="total",
@@ -78,12 +83,12 @@ def mapa_base(nodos: dict, periodo: str, por_periodo: dict, escala: str = "rv") 
         marker=dict(
             colors=pp["colores"], colorscale=ESCALAS[escala]["colores"],
             cmin=-pp["limite"], cmax=pp["limite"], cmid=0, showscale=False,
-            line=dict(color=PAPEL, width=1.2), cornerradius=3,
+            line=dict(color=REJILLA, width=bordes), cornerradius=3,
             pad=dict(t=20, l=2, r=2, b=2),
         ),
         pathbar=dict(visible=True, side="top", thickness=22, edgeshape=">",
                      textfont=dict(family=FUENTE, size=13, color=TINTA)),
-        tiling=dict(packing="squarify", pad=1.5),
+        tiling=dict(packing="squarify", pad=0),
         maxdepth=3, sort=True, root=dict(color=PAPEL),
         hoverlabel=dict(bgcolor=PAPEL, bordercolor=TINTA, font=dict(family=FUENTE, size=13, color=TINTA)),
     ))
