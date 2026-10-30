@@ -16,7 +16,13 @@ FUENTE = "CMU, Georgia, 'Times New Roman', serif"
 TINTA = "#1a1a1a"
 GRIS = "#555555"
 PAPEL = "#ffffff"
-REJILLA = "#1f1f1f"
+REJILLA = "#141414"
+# El mapa va en una sans gruesa (la del sistema: San Francisco en iPhone/Mac, Segoe en Windows,
+# Roboto en Android); las cabeceras de sector son una franja oscura del mismo tono que la rejilla.
+FUENTE_MAPA = ("-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', 'Segoe UI', "
+               "Roboto, Arial, sans-serif")
+CABECERA = REJILLA
+TEXTO_CABECERA = "#e9e9e6"
 
 # Escalas divergentes con el centro en un gris cálido muy claro. En rojo y verde
 # el color se satura pronto (una caída pequeña ya se ve roja) y oscurece hacia los
@@ -66,35 +72,49 @@ def tam_letra(cuota: float) -> float:
     return round(min(30.0, max(9.0, 8 + math.sqrt(cuota) * 95)), 1)
 
 
+def es_cabecera(nid: str) -> bool:
+    return nid == "S&P 500" or nid.startswith("sec:")
+
+
+def colores_mapa(ids: list[str], valores: list[float], limite: float, escala: str = "rv") -> list[str]:
+    """Colores ya resueltos: cada valor según la escala y las cabeceras en la franja oscura."""
+    return [CABECERA if es_cabecera(i) else color_en(escala, 0.5 + v / (2 * limite)) for i, v in zip(ids, valores)]
+
+
 def mapa_base(nodos: dict, periodo: str, por_periodo: dict, escala: str = "rv") -> go.Figure:
     pp = por_periodo[periodo]
+    ids = nodos["ids"]
     # Rejilla oscura: línea fina entre valores y más gruesa alrededor de cada sector.
-    bordes = [0 if i == "S&P 500" else 2.5 if i.startswith("sec:") else 1 for i in nodos["ids"]]
+    bordes = [0 if i == "S&P 500" else 2.5 if i.startswith("sec:") else 1 for i in ids]
+    # Las etiquetas de los valores (ticker, logo y variación) las pone el navegador encima del mapa,
+    # a la medida de cada casilla; aquí sólo se dibujan las cabeceras de sector, en versalitas blancas.
+    tam = [11 if es_cabecera(i) else t for i, t in zip(ids, nodos["tam_letra"])]
+    etiquetas = [l.upper() if es_cabecera(i) else l for i, l in zip(ids, pp["labels"])]
     fig = go.Figure(go.Treemap(
-        ids=nodos["ids"], labels=pp["labels"], parents=nodos["parents"],
+        ids=ids, labels=etiquetas, parents=nodos["parents"],
         values=nodos["valores_cap"], branchvalues="total",
         customdata=nodos["customdata"],
         text=pp["text"],
         texttemplate=nodos["texttemplate"],
         hovertemplate=nodos["hovertemplate"],
         textposition="middle center",
-        textfont=dict(family=FUENTE, size=nodos["tam_letra"]),
-        insidetextfont=dict(family=FUENTE),
+        textfont=dict(family=FUENTE_MAPA, size=tam, weight=[600 if es_cabecera(i) else 700 for i in ids],
+                      color=[TEXTO_CABECERA if es_cabecera(i) else "rgba(0,0,0,0)" for i in ids]),
+        insidetextfont=dict(family=FUENTE_MAPA),
         marker=dict(
-            colors=pp["colores"], colorscale=ESCALAS[escala]["colores"],
-            cmin=-pp["limite"], cmax=pp["limite"], cmid=0, showscale=False,
-            line=dict(color=REJILLA, width=bordes), cornerradius=3,
-            pad=dict(t=20, l=2, r=2, b=2),
+            colors=colores_mapa(ids, pp["colores"], pp["limite"], escala),
+            line=dict(color=REJILLA, width=bordes), cornerradius=0,
+            pad=dict(t=17, l=1, r=1, b=1),
         ),
-        pathbar=dict(visible=True, side="top", thickness=22, edgeshape=">",
-                     textfont=dict(family=FUENTE, size=13, color=TINTA)),
+        pathbar=dict(visible=True, side="top", thickness=20, edgeshape=">",
+                     textfont=dict(family=FUENTE_MAPA, size=11, color=TINTA)),
         tiling=dict(packing="squarify", pad=0),
-        maxdepth=3, sort=True, root=dict(color=PAPEL),
-        hoverlabel=dict(bgcolor=PAPEL, bordercolor=TINTA, font=dict(family=FUENTE, size=13, color=TINTA)),
+        maxdepth=3, sort=True, root=dict(color=CABECERA),
+        hoverlabel=dict(bgcolor=PAPEL, bordercolor=TINTA, font=dict(family=FUENTE_MAPA, size=13, color=TINTA)),
     ))
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0), paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(family=FUENTE, color=TINTA), separators=",.",
+        font=dict(family=FUENTE_MAPA, color=TINTA), separators=",.",
     )
     return fig
 
