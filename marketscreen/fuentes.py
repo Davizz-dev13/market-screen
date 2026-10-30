@@ -20,6 +20,8 @@ from curl_cffi import requests as cr
 
 log = logging.getLogger("marketscreen")
 
+LOGO_URL = "https://companiesmarketcap.com/img/company-logos/128/{}.webp"   # el mismo origen que Big Tech
+LOGO_ALIAS = {"GOOGL": "GOOG", "FOXA": "FOX", "NWSA": "NWS"}
 WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 YH = "https://query1.finance.yahoo.com"
 
@@ -144,3 +146,31 @@ def historicos(s: cr.Session, valores: list[Valor], lote: int = 20, rango: str =
     sin = [v.ticker for v in valores if len(v.cierres) < 30]
     if sin:
         log.warning("Sin histórico suficiente (%d): %s", len(sin), ", ".join(sin))
+
+
+def logos(simbolos: list[str], hilos: int = 8) -> dict[str, bytes]:
+    """Logos (WebP de 128 px) de los valores con más peso, por su símbolo de Yahoo (BRK-B).
+
+    Son sólo decoración: el que falla se queda sin logo y la web se genera igual.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    def uno(sy: str):
+        s = sesion()
+        for cand in dict.fromkeys([sy, LOGO_ALIAS.get(sy, sy)]):
+            try:
+                r = s.get(LOGO_URL.format(cand), timeout=15)
+                if r.status_code == 200 and r.content[:4] == b"RIFF":
+                    return sy, r.content
+            except Exception as e:
+                log.info("%s: sin logo (%r)", sy, e)
+        return sy, None
+
+    try:
+        with ThreadPoolExecutor(hilos) as ex:
+            res = dict(x for x in ex.map(uno, simbolos) if x[1])
+    except Exception as e:  # nunca tumba la publicación por un logo
+        log.warning("Logos: %r", e)
+        return {}
+    log.info("Logos: %d de %d", len(res), len(simbolos))
+    return res
