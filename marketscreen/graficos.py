@@ -22,13 +22,13 @@ PAPEL = "#ffffff"
 ESCALAS = {
     "rv": {  # rojo-verde, los mismos tonos que Sharpe Lab
         "nombre": "Rojo y verde",
-        "colores": [[0.0, "#7f1f1b"], [0.2, "#a8322d"], [0.4, "#d9958c"], [0.5, "#ecebe6"],
-                    [0.6, "#93bf9d"], [0.8, "#2d6a3e"], [1.0, "#1b4628"]],
+        "colores": [[0.0, "#7f1f1b"], [0.2, "#a8322d"], [0.4, "#e2b3ac"], [0.5, "#ecebe6"],
+                    [0.6, "#aecdb5"], [0.8, "#2d6a3e"], [1.0, "#1b4628"]],
     },
     "ab": {  # apto para daltónicos
         "nombre": "Naranja y azul",
-        "colores": [[0.0, "#7a3a00"], [0.2, "#b35806"], [0.4, "#f0b46d"], [0.5, "#ecebe6"],
-                    [0.6, "#9cb9de"], [0.8, "#1a3f8b"], [1.0, "#0f2659"]],
+        "colores": [[0.0, "#7a3a00"], [0.2, "#b35806"], [0.4, "#f2c690"], [0.5, "#ecebe6"],
+                    [0.6, "#b3c8e4"], [0.8, "#1a3f8b"], [1.0, "#0f2659"]],
     },
 }
 

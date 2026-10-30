@@ -6,7 +6,8 @@
 .ms header .fresh{display:block;text-align:center;margin:10px auto 0}
 
 /* Controles */
-.ms-panel{border-top:1.5px solid var(--rule);border-bottom:1px solid var(--rule);padding:12px 0;margin:6px 0 0;position:sticky;top:var(--navh);z-index:20;background:rgba(255,255,255,.97)}
+.ms-panel{border-top:1.5px solid var(--rule);border-bottom:1px solid var(--rule);padding:12px 0;margin:6px 0 0;background:rgba(255,255,255,.97)}
+@media (min-width:761px) and (min-height:700px){.ms-panel{position:sticky;top:var(--navh);z-index:20}}
 .ms-controles{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end}
 .ms-grupo{display:flex;flex-direction:column;gap:4px;margin:0}
 .ms-et{font-variant:small-caps;font-size:13px;color:var(--muted);letter-spacing:.3px;line-height:1}
