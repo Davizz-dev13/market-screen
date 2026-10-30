@@ -27,6 +27,7 @@ from marketscreen import graficos as G
 RAIZ = Path(__file__).resolve().parent
 MADRID = ZoneInfo("Europe/Madrid")
 MINIMO_VALORES = 450   # por debajo de esto no se publica: se conserva la versión anterior
+LOGOS_TOP = 150        # logos de los N valores con más capitalización (sólo las casillas grandes los muestran)
 
 log = logging.getLogger("marketscreen")
 
@@ -164,6 +165,11 @@ def construir(valores: list[S.Valor], salida: Path) -> dict:
     sello = (f"Mercado abierto · precios con hasta 15 min de retraso · {F.fecha(hd)}, {hd:%H:%M} (hora de Madrid)"
              if abierto else f"Mercado cerrado · último precio {F.fecha(hd)}, {hd:%H:%M} (hora de Madrid)")
 
+    # ── Logos de los valores más grandes (decoración: si fallan, el mapa sale sin ellos) ──
+    grandes = sorted(validos, key=lambda v: -v.cap)[:LOGOS_TOP]
+    imgs = S.logos([v.yahoo for v in grandes])
+    logos = {v.ticker: f"logos/{v.yahoo}.webp" for v in grandes if v.yahoo in imgs}
+
     datos = {
         "generado": ahora.isoformat(timespec="seconds"),
         "hora_datos": hora_datos, "sello": sello, "abierto": abierto,
@@ -173,11 +179,15 @@ def construir(valores: list[S.Valor], salida: Path) -> dict:
         "escalas": {k: {"nombre": e["nombre"], "colores": e["colores"]} for k, e in G.ESCALAS.items()},
         "resumen": {p: {k: x for k, x in d.items() if not k.startswith("_")} for p, d in resumen.items()},
         "mapa": {"figura": json.loads(fig_mapa.to_json()), "por_periodo": mapa_pp, "valores_igual": vigual},
-        "barras": barras, "distribucion": distrib, "valores": tabla,
+        "barras": barras, "distribucion": distrib, "valores": tabla, "logos": logos,
     }
 
     salida.mkdir(parents=True, exist_ok=True)
     (salida / "datos.json").write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    if imgs:
+        (salida / "logos").mkdir(exist_ok=True)
+        for sy, contenido in imgs.items():
+            (salida / "logos" / f"{sy}.webp").write_bytes(contenido)
     for f in (RAIZ / "estatico").iterdir():
         shutil.copy(f, salida / f.name)
     import plotly
