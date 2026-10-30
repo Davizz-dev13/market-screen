@@ -29,7 +29,20 @@
 .ms-sec{padding:26px 0 4px}
 .ms-sec > h2{font-size:19px;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--rule);font-weight:700}
 .ms-nota{color:var(--muted);font-style:italic;font-size:14px;margin:-2px 0 6px}
-.ms-mapa{height:min(74vh,700px);min-height:440px;position:relative}
+.ms-mapa{height:min(74vh,700px);min-height:440px;position:relative;background:#141414}
+.ms-mapa .ms-cargando{color:#bbb}
+/* Etiquetas de las casillas (las coloca app.js encima del mapa) */
+.ms-ov{position:absolute;inset:0;pointer-events:none;overflow:hidden;transition:opacity .12s;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue","Segoe UI",Roboto,Arial,sans-serif}
+.ms-ov.oculta{opacity:0;transition:none}
+.ms-ov .t{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;text-align:center;line-height:1;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.28)}
+.ms-ov .t.osc{color:#161616;text-shadow:none}
+.ms-ov .tk{font-weight:800;letter-spacing:.01em;white-space:nowrap}
+.ms-ov .pc{font-weight:700;margin-top:.22em;white-space:nowrap;font-variant-numeric:tabular-nums;opacity:.95}
+.ms-ov .lg{flex:none;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#fff;
+  margin-bottom:.4em;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.ms-ov .lg img{width:68%;height:68%;object-fit:contain;display:block}
 .ms-cargando{color:var(--muted);font-style:italic;padding:40px 0;text-align:center}
 .ms-graf{min-height:280px}
 .ms-leyenda{display:flex;align-items:center;gap:10px;justify-content:center;font-size:13px;color:var(--muted);margin:10px 0 0;font-variant-numeric:tabular-nums}
