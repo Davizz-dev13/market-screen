@@ -1,0 +1,88 @@
+/* Market Screen · encima del tema de Sharpe Lab (theme.css): papel blanco, tinta negra,
+   filetes finos y Computer Modern. Aquí sólo lo propio de esta página. */
+:root{--col:1120px}
+.ms main{padding-top:6px !important}
+.ms header .sub{text-align:center !important}
+.ms header .fresh{display:block;text-align:center;margin:10px auto 0}
+
+/* Controles */
+.ms-panel{border-top:1.5px solid var(--rule);border-bottom:1px solid var(--rule);padding:12px 0;margin:6px 0 0;position:sticky;top:var(--navh);z-index:20;background:rgba(255,255,255,.97)}
+.ms-controles{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end}
+.ms-grupo{display:flex;flex-direction:column;gap:4px;margin:0}
+.ms-et{font-variant:small-caps;font-size:13px;color:var(--muted);letter-spacing:.3px;line-height:1}
+.ms-seg{display:inline-flex}
+.ms-seg button{padding:5px 12px !important;font-size:14px !important;margin:0 -1px 0 0 !important;min-width:44px;min-height:34px;cursor:pointer;font-variant:normal !important;font-variant-numeric:tabular-nums}
+.ms-seg button:hover{background:#f2f2f2 !important}
+.ms-seg button.active,.ms-seg button.active:hover{background:var(--ink) !important;color:var(--paper) !important}
+.ms-grupo select{padding:6px 8px;font-size:14px;min-height:34px;cursor:pointer}
+
+/* Resumen */
+.ms-kpis{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--soft);margin:0}
+.kpi{padding:12px 10px 12px 0;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi + .kpi{border-left:1px solid var(--soft);padding-left:14px}
+.kpi .k{font-variant:small-caps;font-size:13px;color:var(--muted)}
+.kpi b{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pos{color:var(--green) !important}.neg{color:var(--red) !important}
+
+/* Secciones */
+.ms-sec{padding:26px 0 4px}
+.ms-sec > h2{font-size:19px;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--rule);font-weight:700}
+.ms-nota{color:var(--muted);font-style:italic;font-size:14px;margin:-2px 0 6px}
+.ms-mapa{height:min(74vh,700px);min-height:440px;position:relative}
+.ms-cargando{color:var(--muted);font-style:italic;padding:40px 0;text-align:center}
+.ms-graf{min-height:280px}
+.ms-leyenda{display:flex;align-items:center;gap:10px;justify-content:center;font-size:13px;color:var(--muted);margin:10px 0 0;font-variant-numeric:tabular-nums}
+.ms-leyenda .barra{display:block;width:220px;max-width:50vw;height:9px;border:1px solid var(--soft)}
+.ms-dos{display:grid;grid-template-columns:1fr 1fr;gap:0 36px}
+
+/* Listas de valores */
+.ms-tabla{font-size:14.5px;margin:0}
+.ms-tabla td{vertical-align:middle;padding:7px 6px !important}
+.ms-tabla tr{cursor:pointer}
+.ms-tabla .tk{font-weight:700;white-space:nowrap}
+.ms-tabla .nm{color:var(--muted);font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-tabla .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+.ms-tabla .sp{width:96px;padding-right:2px !important}
+.ms-tabla .sp svg{display:block;width:90px;height:26px}
+.ms-tabla .vacio{color:var(--muted);font-style:italic;cursor:default}
+
+/* Ficha del valor */
+.ms-ficha{margin:22px 0 0;border:1px solid var(--rule);padding:16px 18px 14px;position:relative;background:#fff}
+.ms-ficha h3{margin:0;font-size:20px}
+.ms-ficha .meta{color:var(--muted);font-style:italic;font-size:14px;margin:2px 0 10px}
+.ms-ficha .cerrar{position:absolute;top:10px;right:10px;padding:2px 10px !important;font-size:14px !important;cursor:pointer}
+.ms-ficha .linea{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+.ms-ficha .dato{display:flex;flex-direction:column}
+.ms-ficha .dato .k{font-variant:small-caps;font-size:13px;color:var(--muted)}
+.ms-ficha .dato b{font-size:17px;font-variant-numeric:tabular-nums}
+.ms-ficha .rets{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--soft);border-bottom:1px solid var(--soft);margin:6px 0 10px}
+.ms-ficha .rets div{padding:6px 4px;text-align:center;font-variant-numeric:tabular-nums;font-size:14.5px}
+.ms-ficha .rets div span{display:block;font-size:12px;color:var(--muted)}
+.ms-ficha .rets div.on{background:#f3f3f3}
+.ms-ficha svg{width:100%;height:120px;display:block}
+.ms-ficha .pie{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:4px}
+
+#buscar{width:100%;max-width:520px;padding:9px 10px;font-size:16px}
+.ms-metodo p{font-size:14.5px;line-height:1.65}
+
+@media (max-width:760px){
+  .ms-kpis{grid-template-columns:1fr 1fr}
+  .kpi:nth-child(3){border-left:0;padding-left:0}
+  .kpi:nth-child(n+3){border-top:1px solid var(--soft)}
+  .ms-dos{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .ms-panel{padding:10px 0}
+  .ms-controles{gap:10px 12px}
+  .ms-grupo:not(:first-child){flex:1 1 40%;min-width:0}
+  .ms-grupo:nth-child(2){flex-basis:100%}
+  .ms-grupo select{width:100%;font-size:14px;padding:6px 4px}
+  .ms-seg{width:100%}
+  .ms-seg button{flex:1;min-width:0;padding:5px 0 !important;font-size:13.5px !important}
+  .ms-grupo:first-child{flex:1 1 100%}
+  .ms-mapa{height:68vh;min-height:420px}
+  .kpi b{font-size:16px;white-space:normal}
+  .ms-tabla .nm{max-width:120px}
+  .ms-tabla .sp{width:64px}.ms-tabla .sp svg{width:60px}
+  .ms-ficha .rets{grid-template-columns:repeat(3,1fr)}
+}

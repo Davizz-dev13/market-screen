@@ -1,0 +1,6 @@
+_site/
+__pycache__/
+.venv/
+*.pyc
+crudo.json
+.pytest_cache/

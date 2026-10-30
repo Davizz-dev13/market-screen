@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Screen · Sharpe Lab</title>
+<meta name="description" content="Mapa del S&P 500 por sectores: tamaño por capitalización y color por rentabilidad en 1 día, 1 semana, 1 mes, 3 meses, en el año y 1 año. Se actualiza solo.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="canonical" href="https://davizz-dev13.github.io/market-screen/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sharpe Lab">
+<meta property="og:title" content="Market Screen · Sharpe Lab">
+<meta property="og:description" content="El S&P 500 de un vistazo: mapa por sectores, sectores, distribución y valores que más suben y bajan.">
+<meta property="og:url" content="https://davizz-dev13.github.io/market-screen/">
+<link rel="stylesheet" href="https://davizz-dev13.github.io/sharpe-lab/theme.css">
+<link rel="stylesheet" href="estilos.css?v={{ version }}">
+<script src="https://davizz-dev13.github.io/sharpe-lab/site.js"></script>
+<script src="{{ plotly_js }}" defer></script>
+<script src="app.js?v={{ version }}" defer></script>
+</head>
+<body class="has-topnav ms">
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/">RSI 30</a></div></div><div class="nav-group has-on"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="/market-screen/" aria-current="page">Market Screen</a><a href="/sharpe-lab/optimizador/">Optimizador CVaR</a><a href="/sharpe-lab/interes/">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+
+<header>
+  <h1>Market Screen</h1>
+  <p class="sub">Las {{ n }} empresas del S&amp;P 500 de un vistazo: el tamaño de cada casilla es su capitalización y el color, lo que ha subido o bajado. Toca un sector para ampliarlo y un valor para ver su ficha.</p>
+  <p class="fresh" id="sello">{{ sello }}</p>
+</header>
+
+<main id="contenido">
+  <section class="ms-panel" aria-label="Controles">
+    <div class="ms-controles">
+      <div class="ms-grupo" role="group" aria-label="Periodo">
+        <span class="ms-et">Periodo</span>
+        <div class="ms-seg" id="periodos">
+          {% for pid, corto, largo in periodos %}<button type="button" data-p="{{ pid }}" title="Rentabilidad {{ largo }}"{% if loop.first %} class="active" aria-pressed="true"{% else %} aria-pressed="false"{% endif %}>{{ corto }}</button>{% endfor %}
+        </div>
+      </div>
+      <label class="ms-grupo"><span class="ms-et">Grupo</span>
+        <select id="grupo"><option value="">Todos los sectores</option>{% for s in sectores %}<option value="{{ loop.index0 }}">{{ s }}</option>{% endfor %}</select>
+      </label>
+      <label class="ms-grupo"><span class="ms-et">Tamaño</span>
+        <select id="tamano"><option value="cap">Por capitalización</option><option value="igual">Todas iguales</option></select>
+      </label>
+      <label class="ms-grupo"><span class="ms-et">Colores</span>
+        <select id="escala">{% for k, e in escalas.items() %}<option value="{{ k }}">{{ e.nombre }}</option>{% endfor %}</select>
+      </label>
+    </div>
+  </section>
+
+  <section class="ms-kpis" aria-label="Resumen" aria-live="polite">
+    <div class="kpi"><span class="k">S&amp;P 500<sup>*</sup></span><b id="k-indice" class="{{ 'pos' if r.indice_signo else 'neg' }}">{{ r.indice }}</b></div>
+    <div class="kpi"><span class="k">Suben / bajan</span><b><span id="k-suben" class="pos">{{ r.suben }}</span> / <span id="k-bajan" class="neg">{{ r.bajan }}</span></b></div>
+    <div class="kpi"><span class="k">Mejor sector</span><b id="k-mejor">{{ r.mejor[0] }} {{ r.mejor[1] }}</b></div>
+    <div class="kpi"><span class="k">Peor sector</span><b id="k-peor">{{ r.peor[0] }} {{ r.peor[1] }}</b></div>
+  </section>
+
+  <section class="ms-sec" aria-labelledby="t-mapa">
+    <h2 id="t-mapa">Mapa por sectores</h2>
+    <div id="mapa" class="ms-mapa" role="img" aria-label="Mapa del S&P 500 por sectores"><p class="ms-cargando">Cargando el mapa…</p></div>
+    <div class="ms-leyenda" aria-hidden="true"><span id="ley-min"></span><span class="barra" id="ley-barra"></span><span id="ley-max"></span></div>
+  </section>
+
+  <section class="ms-ficha" id="ficha" hidden aria-live="polite"></section>
+
+  <div class="ms-dos">
+    <section class="ms-sec" aria-labelledby="t-sub">
+      <h2 id="t-sub">Los que más suben</h2>
+      <div class="tscroll"><table class="ms-tabla" id="suben"></table></div>
+    </section>
+    <section class="ms-sec" aria-labelledby="t-baj">
+      <h2 id="t-baj">Los que más bajan</h2>
+      <div class="tscroll"><table class="ms-tabla" id="bajan"></table></div>
+    </section>
+  </div>
+
+  <section class="ms-sec" aria-labelledby="t-sect">
+    <h2 id="t-sect">Rentabilidad por sector</h2>
+    <p class="ms-nota">Media de cada sector ponderada por capitalización. La línea de puntos es el S&amp;P 500.</p>
+    <div id="barras" class="ms-graf"></div>
+  </section>
+
+  <section class="ms-sec" aria-labelledby="t-dist">
+    <h2 id="t-dist">¿Cuántos valores acompañan?</h2>
+    <p class="ms-nota">Cuántas empresas suben o bajan y cuánto. Un índice que sube con la mayoría a favor es más sano que uno que sube por cuatro gigantes.</p>
+    <div id="distribucion" class="ms-graf"></div>
+  </section>
+
+  <section class="ms-sec" aria-labelledby="t-bus">
+    <h2 id="t-bus">Buscar un valor</h2>
+    <input id="buscar" type="search" placeholder="Ticker o empresa, p. ej. MSFT o Microsoft" autocomplete="off" list="lista-valores" aria-label="Buscar un valor">
+    <datalist id="lista-valores"></datalist>
+  </section>
+
+  <section class="ms-sec ms-metodo" aria-labelledby="t-met">
+    <h2 id="t-met">De dónde salen los datos</h2>
+    <p>Componentes y sector GICS: <a href="https://en.wikipedia.org/wiki/List_of_S%26P_500_companies">lista de Wikipedia</a>. Precios, capitalización e históricos diarios: Yahoo Finance. Una tarea programada en GitHub Actions lo descarga varias veces al día entre semana (dos durante la sesión de Nueva York y otra tras el cierre), lo calcula y lo publica. Todo está escrito en Python: el código está en <a href="https://github.com/Davizz-dev13/market-screen">GitHub</a>.</p>
+    <p><sup>*</sup> Aproximación ponderada por capitalización total, no la cifra oficial del índice (que pondera por capital flotante). Las rentabilidades son de precio, sin dividendos. De las empresas con dos clases de acciones (Alphabet, Fox, News Corp) se muestra una sola para no contarlas dos veces.</p>
+  </section>
+</main>
+
+<footer class="site-foot"><p class="foot-legal"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta.</p><p class="foot-links"><a href="/sharpe-lab/">Inicio</a><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a href="https://github.com/Davizz-dev13/market-screen">Código en GitHub</a><a href="https://davizz-dev13.github.io/">David Gallardo</a></p><p class="foot-sig">Sharpe Lab &middot; David Gallardo &middot; Madrid, España</p></footer>
+</body>
+</html>

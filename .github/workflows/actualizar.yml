@@ -1,0 +1,51 @@
+name: Actualizar Market Screen
+
+on:
+  schedule:
+    # Horas en UTC, de lunes a viernes. Nueva York abre a las 13:30/14:30 UTC y cierra a las 20:00/21:00 UTC
+    # (según el horario de verano de EE. UU.). Dos pasadas con el mercado abierto y una tras el cierre.
+    - cron: "0 15 * * 1-5"
+    - cron: "30 18 * * 1-5"
+    - cron: "30 21 * * 1-5"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt pytest
+      - name: Pruebas
+        run: python -m pytest -q
+      - name: Descargar datos y generar la web
+        run: python build.py --salida _site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
